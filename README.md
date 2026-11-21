@@ -57,3 +57,7 @@ Every `git push` to `main` redeploys automatically.
 
 - The PDF is made in the browser with html2pdf.js (loaded from cdnjs), so it needs an internet connection the first time.
 - Form values are remembered in the browser (localStorage). The Reset button clears them.
+
+## Visitor counts
+
+`index.html` already includes the Vercel Web Analytics script. In the Vercel dashboard open your project, go to **Analytics** and click **Enable**, then redeploy. Counts appear there after people visit. The script does nothing when the site runs locally.
