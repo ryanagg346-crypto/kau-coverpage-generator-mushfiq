@@ -64,11 +64,11 @@
           <div class="row">
             <label class="field">
               <span>Date of performance <em>(optional)</em></span>
-              <input id="performDate" name="performDate" type="date" />
+              <input id="performDate" name="performDate" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" />
             </label>
             <label class="field">
               <span>Date of submission</span>
-              <input id="submitDate" name="submitDate" type="date" />
+              <input id="submitDate" name="submitDate" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" />
             </label>
           </div>
         </fieldset>
@@ -102,8 +102,11 @@
           </label>
           <label class="field">
             <span>Program</span>
-            <input id="program" name="program" type="text" list="programList" placeholder="B.Sc. Ag. Econ. (Hons.)" />
-            <datalist id="programList"></datalist>
+            <select id="program" name="program"></select>
+          </label>
+          <label class="field" id="programOtherWrap" hidden>
+            <span>Your program</span>
+            <input id="programOther" name="programOther" type="text" placeholder="Type your program" />
           </label>
           <div class="row">
             <label class="field">
