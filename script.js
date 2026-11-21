@@ -3,8 +3,7 @@
 
   var FACULTIES = window.KAU_FACULTIES;
   var INFO = window.KAU_INFO;
-  var STORE_KEY = "kau-cover-v2";
-  var OLD_STORE_KEY = "kau-cover-v1";
+  var STORE_KEY = "kau-cover-v1";
   var PAGE_W = 794;
   var PAGE_H = 1122;
 
@@ -25,8 +24,6 @@
     teacherDept: $("teacherDept"),
     studentName: $("studentName"),
     program: $("program"),
-    programOther: $("programOther"),
-    programOtherWrap: $("programOtherWrap"),
     level: $("level"),
     semester: $("semester"),
     studentId: $("studentId"),
@@ -39,7 +36,7 @@
     scaler: $("sheetScaler"),
     scroll: $("previewScroll"),
     designationList: $("designationList"),
-    _unused: null
+    programList: $("programList")
   };
 
   var teacherFacultyTouched = false;
@@ -57,23 +54,18 @@
 
   function clean(s) { return String(s || "").trim(); }
 
-  /* dates are typed as dd/mm/yyyy */
-  function fmtDate(v) { return clean(v); }
-
-  // Accept old saved values (yyyy-mm-dd) and convert them.
-  function normDate(v) {
-    v = clean(v);
-    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
-    return m ? m[3] + "/" + m[2] + "/" + m[1] : v;
+  function fmtDate(iso) {
+    if (!iso) return "";
+    var p = iso.split("-");
+    if (p.length !== 3) return iso;
+    return p[2] + "/" + p[1] + "/" + p[0].slice(-2);
   }
 
-  function maskDate(e) {
-    var input = e.target;
-    var digits = input.value.replace(/\D/g, "").slice(0, 8);
-    var out = digits;
-    if (digits.length > 4) out = digits.slice(0, 2) + "/" + digits.slice(2, 4) + "/" + digits.slice(4);
-    else if (digits.length > 2) out = digits.slice(0, 2) + "/" + digits.slice(2);
-    if (input.value !== out) input.value = out;
+  function todayISO() {
+    var d = new Date();
+    var m = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + m + "-" + day;
   }
 
   function facultyById(id) {
@@ -122,7 +114,7 @@
       teacherFaculty: el.teacherFaculty.value,
       teacherDept: el.teacherDept.value,
       studentName: el.studentName.value,
-      program: getProgram(),
+      program: el.program.value,
       level: el.level.value,
       semester: el.semester.value,
       studentId: el.studentId.value,
@@ -139,15 +131,7 @@
   function load() {
     try {
       var raw = localStorage.getItem(STORE_KEY);
-      if (raw) return JSON.parse(raw);
-      // Older version auto-filled today's date; keep the other saved fields but clear the date.
-      var old = localStorage.getItem(OLD_STORE_KEY);
-      if (old) {
-        var o = JSON.parse(old);
-        o.submitDate = "";
-        return o;
-      }
-      return null;
+      return raw ? JSON.parse(raw) : null;
     } catch (e) { return null; }
   }
 
@@ -159,7 +143,6 @@
     var fav = document.querySelector('link[rel="icon"]');
     if (fav) fav.href = window.KAU_LOGO;
 
-    buildProgramSelect();
     fillSelect(el.faculty, FACULTIES, function (f) { return f.id; }, function (f) { return f.name; });
     fillSelect(el.teacherFaculty, FACULTIES, function (f) { return f.id; }, function (f) { return f.name; });
     fillSelect(el.docType, window.DOC_TYPES, function (t) { return t; }, function (t) { return t; });
@@ -188,7 +171,7 @@
     el.teacherFaculty.value = el.faculty.value;
     fillDepartments(el.teacherDept, facultyById(el.teacherFaculty.value), false);
     el.docType.value = "Assignment";
-    el.submitDate.value = "";
+    el.submitDate.value = todayISO();
     el.level.value = "1";
     el.semester.value = "I";
   }
@@ -208,12 +191,12 @@
     el.topic.value = v.topic || "";
     el.courseCode.value = v.courseCode || "";
     el.courseTitle.value = v.courseTitle || "";
-    el.performDate.value = normDate(v.performDate);
-    el.submitDate.value = normDate(v.submitDate);
+    el.performDate.value = v.performDate || "";
+    el.submitDate.value = v.submitDate || todayISO();
     el.teacherName.value = v.teacherName || "";
     el.designation.value = v.designation || "";
     el.studentName.value = v.studentName || "";
-    setProgram(v.program || "");
+    el.program.value = v.program || "";
     el.level.value = v.level || "1";
     el.semester.value = v.semester || "I";
     el.studentId.value = v.studentId || "";
@@ -221,61 +204,15 @@
     el.session.value = v.session || "";
   }
 
-  var OTHER = "__other__";
-
-  function buildProgramSelect() {
-    var sel = el.program;
-    sel.innerHTML = "";
-    var first = document.createElement("option");
-    first.value = "";
-    first.textContent = "Select program";
-    sel.appendChild(first);
-    var seen = {};
-    FACULTIES.forEach(function (f) {
-      var g = document.createElement("optgroup");
-      g.label = f.name;
-      f.programs.forEach(function (p) {
-        if (seen[p]) return;
-        seen[p] = true;
-        var o = document.createElement("option");
-        o.value = p;
-        o.textContent = p;
-        g.appendChild(o);
-      });
-      if (g.children.length) sel.appendChild(g);
+  function updateProgramList() {
+    var f = facultyById(el.faculty.value);
+    el.programList.innerHTML = "";
+    f.programs.forEach(function (p) {
+      var o = document.createElement("option");
+      o.value = p;
+      el.programList.appendChild(o);
     });
-    var other = document.createElement("option");
-    other.value = OTHER;
-    other.textContent = "Other (type your own)";
-    sel.appendChild(other);
   }
-
-  function toggleOther() {
-    var on = el.program.value === OTHER;
-    el.programOtherWrap.hidden = !on;
-  }
-
-  function getProgram() {
-    return el.program.value === OTHER ? el.programOther.value : el.program.value;
-  }
-
-  function setProgram(val) {
-    val = clean(val);
-    var found = false;
-    for (var i = 0; i < el.program.options.length; i++) {
-      if (el.program.options[i].value === val && val !== OTHER) { found = true; break; }
-    }
-    if (found || val === "") {
-      el.program.value = val;
-      el.programOther.value = "";
-    } else {
-      el.program.value = OTHER;
-      el.programOther.value = val;
-    }
-    toggleOther();
-  }
-
-  function updateProgramList() { /* programs are listed once, see buildProgramSelect */ }
 
   function allPrograms() {
     var out = [];
@@ -289,10 +226,10 @@
     updateProgramList();
 
     // Suggest the program for this faculty unless the user typed something custom.
-    var cur = clean(getProgram());
-    var isAuto = cur === "" || cur === lastAutoProgram;
+    var cur = clean(el.program.value);
+    var isAuto = cur === "" || cur === lastAutoProgram || allPrograms().indexOf(cur) !== -1;
     if (isAuto && f.programs.length) {
-      setProgram(f.programs[0]);
+      el.program.value = f.programs[0];
       lastAutoProgram = f.programs[0];
     }
 
@@ -312,9 +249,6 @@
       render(); save();
     });
 
-    el.performDate.addEventListener("input", maskDate);
-    el.submitDate.addEventListener("input", maskDate);
-    el.program.addEventListener("change", toggleOther);
     el.form.addEventListener("input", function () { render(); save(); });
     el.form.addEventListener("change", function () { render(); save(); });
     el.form.addEventListener("submit", function (e) { e.preventDefault(); });
@@ -331,7 +265,7 @@
     el.form.reset();
     teacherFacultyTouched = false;
     lastAutoProgram = "";
-    setProgram("");
+    el.program.value = "";
     applyDefaults();
     el.topic.value = "";
     el.courseCode.value = "";
@@ -371,8 +305,8 @@
     var topic = clean(v.topic);
     var code = clean(v.courseCode);
     var title = clean(v.courseTitle);
-    var perform = fmtDate(v.performDate) || "dd/mm/yyyy";
-    var submit = fmtDate(v.submitDate) || "dd/mm/yyyy";
+    var perform = fmtDate(v.performDate) || "dd/mm/yy";
+    var submit = fmtDate(v.submitDate) || "dd/mm/yy";
     var dept = clean(v.department);
     var footer = [code, title].filter(Boolean).join("  \u2022  ");
 
@@ -444,7 +378,7 @@
   }
 
   function downloadPdf() {
-    if (typeof window.html2pdf !== "function") {
+    if (typeof window.html2canvas !== "function" || !window.jspdf) {
       setStatus("The PDF library did not load. Check your internet connection and reload the page.");
       return;
     }
@@ -455,9 +389,13 @@
     el.downloadBtn.disabled = true;
     setStatus("Creating PDF...");
 
-    // Render an unscaled copy off-screen so the PDF is always full A4 size.
+    // Render an unscaled copy pinned at the top-left corner (invisible, behind the page).
+    // It must NOT be off-screen or centred: html2canvas then captures the wrong region
+    // on wide (desktop) screens and the PDF comes out mostly blank.
     var holder = document.createElement("div");
-    holder.style.cssText = "position:fixed;left:-10000px;top:0;width:" + PAGE_W + "px;height:" + PAGE_H + "px;";
+    holder.id = "pdfHolder";
+    holder.style.cssText = "position:fixed;left:0;top:0;width:" + PAGE_W + "px;height:" + PAGE_H +
+      "px;z-index:-1;opacity:0;pointer-events:none;overflow:hidden;";
     var copy = document.createElement("div");
     copy.className = "sheet";
     copy.innerHTML = sheetHTML(v);
@@ -467,23 +405,28 @@
     var ready = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
     ready
       .then(function () {
-        return window.html2pdf()
-          .set({
-            margin: 0,
-            filename: filename,
-            image: { type: "jpeg", quality: 0.98 },
-            html2canvas: {
-              scale: 3,
-              useCORS: true,
-              backgroundColor: "#ffffff",
-              scrollX: 0,
-              scrollY: 0,
-              windowWidth: PAGE_W
-            },
-            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-          })
-          .from(copy)
-          .save();
+        return window.html2canvas(copy, {
+          scale: 3,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          width: PAGE_W,
+          height: PAGE_H,
+          x: 0,
+          y: 0,
+          scrollX: 0,
+          scrollY: 0,
+          onclone: function (doc) {
+            // the real holder is invisible (opacity 0); make the cloned one visible
+            var h = doc.getElementById("pdfHolder");
+            if (h) h.style.opacity = "1";
+          }
+        });
+      })
+      .then(function (canvas) {
+        var JsPDF = window.jspdf.jsPDF;
+        var pdf = new JsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+        pdf.addImage(canvas.toDataURL("image/jpeg", 0.98), "JPEG", 0, 0, 210, 297);
+        pdf.save(filename);
       })
       .then(function () { setStatus("Downloaded " + filename); })
       .catch(function (err) {
@@ -491,7 +434,7 @@
         setStatus("Could not create the PDF. Please try again.");
       })
       .then(function () {
-        document.body.removeChild(holder);
+        if (holder.parentNode) holder.parentNode.removeChild(holder);
         el.downloadBtn.disabled = false;
       });
   }

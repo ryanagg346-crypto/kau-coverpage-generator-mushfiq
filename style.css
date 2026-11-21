@@ -248,4 +248,3 @@ input::placeholder { color: #9aabae; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
-[hidden] { display: none !important; }

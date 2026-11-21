@@ -55,7 +55,7 @@ Every `git push` to `main` redeploys automatically.
 
 ## Notes
 
-- The PDF is made in the browser with html2pdf.js (loaded from cdnjs), so it needs an internet connection the first time.
+- The PDF is made in the browser with html2canvas and jsPDF (loaded from cdnjs), so it needs an internet connection the first time.
 - Form values are remembered in the browser (localStorage). The Reset button clears them.
 
 ## Visitor counts
