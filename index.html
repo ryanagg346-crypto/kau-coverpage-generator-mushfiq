@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>KAU Cover Page Generator</title>
+  <meta name="description" content="Make an assignment, lab report or presentation cover page for Khulna Agricultural University and download it as a PDF." />
+  <link rel="icon" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Arimo:wght@400;700&family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <img alt="" class="topbar-logo" width="30" height="35" />
+    <div class="topbar-title">
+      <h1>KAU Cover Page Generator</h1>
+      <p>Fill in the form. The preview updates as you type.</p>
+    </div>
+    <a href="#contact" class="topbar-link">Contact</a>
+  </header>
+
+  <main class="layout">
+    <!-- ============ FORM ============ -->
+    <section class="panel form-panel" aria-label="Cover page details">
+      <form id="form" autocomplete="off" novalidate>
+
+        <fieldset>
+          <legend>Your faculty</legend>
+          <label class="field">
+            <span>Faculty</span>
+            <select id="faculty" name="faculty"></select>
+          </label>
+          <label class="field">
+            <span>Department <em>(optional)</em></span>
+            <select id="department" name="department"></select>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Document</legend>
+          <label class="field">
+            <span>Type</span>
+            <select id="docType" name="docType"></select>
+          </label>
+          <label class="field">
+            <span>Topic <em>(optional)</em></span>
+            <input id="topic" name="topic" type="text" placeholder="Origin and Domestication of Farm Animals" />
+          </label>
+          <div class="row">
+            <label class="field">
+              <span>Course code</span>
+              <input id="courseCode" name="courseCode" type="text" placeholder="ANSC-1101" />
+            </label>
+            <label class="field wide">
+              <span>Course title</span>
+              <input id="courseTitle" name="courseTitle" type="text" placeholder="Management of Animal Science and Poultry (T)" />
+            </label>
+          </div>
+          <div class="row">
+            <label class="field">
+              <span>Date of performance <em>(optional)</em></span>
+              <input id="performDate" name="performDate" type="date" />
+            </label>
+            <label class="field">
+              <span>Date of submission</span>
+              <input id="submitDate" name="submitDate" type="date" />
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Assigned by (teacher)</legend>
+          <label class="field">
+            <span>Teacher name</span>
+            <input id="teacherName" name="teacherName" type="text" placeholder="Dr. Fowzia Bahar" />
+          </label>
+          <label class="field">
+            <span>Designation</span>
+            <input id="designation" name="designation" type="text" list="designationList" placeholder="Assistant Professor" />
+            <datalist id="designationList"></datalist>
+          </label>
+          <label class="field">
+            <span>Teacher's faculty</span>
+            <select id="teacherFaculty" name="teacherFaculty"></select>
+          </label>
+          <label class="field">
+            <span>Teacher's department</span>
+            <select id="teacherDept" name="teacherDept"></select>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Submitted by</legend>
+          <label class="field">
+            <span>Name</span>
+            <input id="studentName" name="studentName" type="text" placeholder="Mushfiqur Rahman" />
+          </label>
+          <label class="field">
+            <span>Program</span>
+            <input id="program" name="program" type="text" list="programList" placeholder="B.Sc. Ag. Econ. (Hons.)" />
+            <datalist id="programList"></datalist>
+          </label>
+          <div class="row">
+            <label class="field">
+              <span>Level</span>
+              <select id="level" name="level">
+                <option value="1">Level - 1</option>
+                <option value="2">Level - 2</option>
+                <option value="3">Level - 3</option>
+                <option value="4">Level - 4</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Semester</span>
+              <select id="semester" name="semester">
+                <option value="I">Semester - I</option>
+                <option value="II">Semester - II</option>
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <label class="field">
+              <span>Student ID <em>(optional)</em></span>
+              <input id="studentId" name="studentId" type="text" />
+            </label>
+            <label class="field">
+              <span>Registration no. <em>(optional)</em></span>
+              <input id="regNo" name="regNo" type="text" />
+            </label>
+          </div>
+          <label class="field">
+            <span>Session <em>(optional)</em></span>
+            <input id="session" name="session" type="text" placeholder="2025-26" />
+          </label>
+        </fieldset>
+
+        <div class="actions">
+          <button type="button" id="downloadBtn" class="btn primary">Download PDF</button>
+          <button type="button" id="resetBtn" class="btn ghost">Reset</button>
+        </div>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- ============ PREVIEW ============ -->
+    <section class="panel preview-panel" aria-label="Preview">
+      <div class="preview-label">Preview (A4)</div>
+      <div class="preview-scroll" id="previewScroll">
+        <div class="sheet-scaler" id="sheetScaler">
+          <div class="sheet" id="sheet"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="contact" id="contact">
+    <h2>Contact</h2>
+    <p>Have a question, suggestion or problem? Get in touch.</p>
+    <p class="contact-line">
+      <strong>Name</strong> <span id="contactName">Mushfiqur Rahman</span>
+      <span class="sep"></span>
+      <strong>Department</strong> <span>Agricultural Economics and Agribusiness Studies</span>
+    </p>
+    <p class="contact-line">
+      <strong>Email</strong> <a id="contactEmail" href="mailto:badhon.mushfiqh2@gmail.com">badhon.mushfiqh2@gmail.com</a>
+      <span class="sep"></span>
+      <strong>Phone</strong> <a id="contactPhone" href="tel:+8801718924795">01718924795</a>
+    </p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
