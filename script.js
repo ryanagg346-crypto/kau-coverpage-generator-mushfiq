@@ -3,7 +3,8 @@
 
   var FACULTIES = window.KAU_FACULTIES;
   var INFO = window.KAU_INFO;
-  var STORE_KEY = "kau-cover-v1";
+  var STORE_KEY = "kau-cover-v2";
+  var OLD_STORE_KEY = "kau-cover-v1";
   var PAGE_W = 794;
   var PAGE_H = 1122;
 
@@ -58,11 +59,6 @@
 
   /* dates are typed as dd/mm/yyyy */
   function fmtDate(v) { return clean(v); }
-
-  function todayDMY() {
-    var d = new Date();
-    return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
-  }
 
   // Accept old saved values (yyyy-mm-dd) and convert them.
   function normDate(v) {
@@ -143,7 +139,15 @@
   function load() {
     try {
       var raw = localStorage.getItem(STORE_KEY);
-      return raw ? JSON.parse(raw) : null;
+      if (raw) return JSON.parse(raw);
+      // Older version auto-filled today's date; keep the other saved fields but clear the date.
+      var old = localStorage.getItem(OLD_STORE_KEY);
+      if (old) {
+        var o = JSON.parse(old);
+        o.submitDate = "";
+        return o;
+      }
+      return null;
     } catch (e) { return null; }
   }
 
@@ -184,7 +188,7 @@
     el.teacherFaculty.value = el.faculty.value;
     fillDepartments(el.teacherDept, facultyById(el.teacherFaculty.value), false);
     el.docType.value = "Assignment";
-    el.submitDate.value = todayDMY();
+    el.submitDate.value = "";
     el.level.value = "1";
     el.semester.value = "I";
   }
@@ -205,7 +209,7 @@
     el.courseCode.value = v.courseCode || "";
     el.courseTitle.value = v.courseTitle || "";
     el.performDate.value = normDate(v.performDate);
-    el.submitDate.value = normDate(v.submitDate) || todayDMY();
+    el.submitDate.value = normDate(v.submitDate);
     el.teacherName.value = v.teacherName || "";
     el.designation.value = v.designation || "";
     el.studentName.value = v.studentName || "";
